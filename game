@@ -1,0 +1,71 @@
+const colors = ["Red","Blue","Green","Yellow","Purple","Orange"];
+const wheel = document.getElementById("wheel");
+const spinBtn = document.getElementById("spin-btn");
+const stopBtn = document.getElementById("stop-btn");
+const result = document.getElementById("result");
+const targetColorEl = document.getElementById("target-color");
+const scoreEl = document.getElementById("score");
+const roundsEl = document.getElementById("rounds");
+
+let spinning = false;
+let rotation = 0;
+let currentRotation = 0;
+let score = 0;
+let rounds = 0;
+let targetColor = colors[Math.floor(Math.random()*colors.length)];
+
+function drawWheel(){
+  const deg = 360/colors.length;
+  for(let i=0;i<colors.length;i++){
+    const section = document.createElement("div");
+    section.className="wheel-section";
+    section.style.transform=`rotate(${i*deg}deg) skewY(${90-deg}deg)`;
+    section.style.backgroundColor=colors[i];
+    section.innerText=colors[i];
+    wheel.appendChild(section);
+  }
+}
+
+function setTarget(){
+  targetColor = colors[Math.floor(Math.random()*colors.length)];
+  targetColorEl.textContent="Target: " + targetColor;
+}
+
+function spinWheel(){
+  spinning = true;
+  spinBtn.disabled=true;
+  stopBtn.disabled=false;
+  let extra = 720 + 360*Math.random();
+  rotation = currentRotation + extra;
+  wheel.style.transform=`rotate(${rotation}deg)`;
+  currentRotation = rotation;
+}
+
+function stopWheel(){
+  if(spinning){
+    spinning=false;
+    spinBtn.disabled=false;
+    stopBtn.disabled=true;
+    rounds++;
+    roundsEl.textContent=rounds;
+
+    const deg = 360/colors.length;
+    const normalized=(rotation%360+360)%360;
+    const index=Math.floor((colors.length*normalized)/360);
+    const landed = colors[(colors.length-index)%colors.length];
+
+    if(landed===targetColor){
+      score++;
+      result.textContent="🎉 You got it! "+landed;
+    } else {
+      result.textContent="❌ You landed on "+landed+", target was "+targetColor;
+    }
+    scoreEl.textContent=score;
+    setTarget();
+  }
+}
+
+drawWheel();
+setTarget();
+spinBtn.addEventListener("click",spinWheel);
+stopBtn.addEventListener("click",stopWheel);
